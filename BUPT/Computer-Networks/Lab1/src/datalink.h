@@ -1,7 +1,7 @@
-#define DATA_TIMER  2000
-#define ACK_TIMER  400
+#define DATA_TIMER  3000 // 2000
+#define ACK_TIMER  1000
 
-#define MAX_SEQ 15 // should be 2^n-1
+#define MAX_SEQ 63 // should be 2^n-1 // 16
 #define NR_BUFS ((MAX_SEQ+1)/2)
 
 /* FRAME kind */
