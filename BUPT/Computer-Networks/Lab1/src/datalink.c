@@ -10,7 +10,7 @@ static bool no_nak = true;                       // no nak has been sent yet
 static bool phl_ready = false;
 
 static unsigned char ack_expected = 0;		     // lower edge of sender's window
-static unsigned char next_frame_to_end = 0;      // upper edge of sender's window +1
+static unsigned char next_frame_to_send = 0;     // upper edge of sender's window +1
 static unsigned char frame_expected = 0;         // lower edge of receiver's window
 static unsigned char too_far = NR_BUFS;          // upper edge of receiver's window +1
 
@@ -80,9 +80,9 @@ int main(int argc, char** argv) {
 		switch (event) {
 		case NETWORK_LAYER_READY:                                     // accept, save, and transmit a new frame
 			++nbuffered;                                              // expand the window
-			get_packet(out_buf[next_frame_to_end % NR_BUFS]);         // fetch new packet
-			send_frame_k(FRAME_DATA, next_frame_to_end);              // transmit the frame
-			next_frame_to_end = inc(next_frame_to_end);               // advance upper window edge
+			get_packet(out_buf[next_frame_to_send % NR_BUFS]);        // fetch new packet
+			send_frame_k(FRAME_DATA, next_frame_to_send);             // transmit the frame
+			next_frame_to_send = inc(next_frame_to_send);             // advance upper window edge
 			break;
 
 		case PHYSICAL_LAYER_READY:
@@ -124,11 +124,11 @@ int main(int argc, char** argv) {
 				break;
 			case FRAME_NAK:
 				dbg_frame("Recv NAK  %d\n", f.ack);
-				if (between(ack_expected, inc(f.ack), next_frame_to_end))
+				if (between(ack_expected, inc(f.ack), next_frame_to_send))
 					send_frame_k(FRAME_DATA, inc(f.ack));
 				break;
 			}
-			while (between(ack_expected, f.ack, next_frame_to_end)) {
+			while (between(ack_expected, f.ack, next_frame_to_send)) {
 				--nbuffered;                                          // handle piggybacked ack
 				stop_timer(ack_expected % NR_BUFS);                   // frame arrived intact
 				ack_expected = inc(ack_expected);                     // advance lower edge of sender's window
