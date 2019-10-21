@@ -1,5 +1,4 @@
 import math
-from sklearn import metrics  # Import scikit-learn metrics module for accuracy calculation
 
 
 class DecisionTreeNode:
@@ -87,14 +86,14 @@ class DecisionTreeNode:
                     node_list.append(child)
             node_list.remove(current_node)
 
-    def fit(self, data, label, partition_attr='gain', test_data=None, test_label=None):
+    def fit(self, data, target, partition_attr='gain', test_data=None, test_target=None):
         """
         Complete subsequent calculations of the current node, including selecting attributes, dividing child nodes, etc.
         :param data: Data set
-        :param label: Label of the data set
+        :param target: Label of the data set
         :param partition_attr: gain or gini_index
         :param test_data: Test data set for pre-pruning
-        :param test_label: Test data set label for pre-pruning
+        :param test_target: Test data set label for pre-pruning
         :return:
         """
 
@@ -104,10 +103,10 @@ class DecisionTreeNode:
         this_data_index = self.data_index
         for i in this_data_index:
             for j in this_data_index:
-                if label[i] != label[j]:
+                if target[i] != target[j]:
                     one_class = False
         if one_class:
-            self.judge = label[this_data_index[0]]
+            self.judge = target[this_data_index[0]]
             return
 
         rest_attr = self.rest_attribute  # Candidate attribute
@@ -116,25 +115,25 @@ class DecisionTreeNode:
             # The class that needs to select the most as the class of the node.
             label_count = {}
             for index in self.data_index:
-                if label_count.__contains__(label[index]):
-                    label_count[label[index]] += 1
+                if label_count.__contains__(target[index]):
+                    label_count[target[index]] += 1
                 else:
-                    label_count[label[index]] = 1
+                    label_count[target[index]] = 1
             final_label = max(label_count)
             self.judge = final_label
             return
 
-        if test_data and test_label:
+        if test_data and test_target:
             # First add a temporary judgment for the current node. If you need to add a child node, then restore it to None.
             data_count = {}
             for index in self.data_index:
-                if data_count.__contains__(label[index]):
-                    data_count[label[index]] += 1
+                if data_count.__contains__(target[index]):
+                    data_count[target[index]] += 1
                 else:
-                    data_count[label[index]] = 1
+                    data_count[target[index]] = 1
             before_judge = max(data_count, key=data_count.get)
             self.judge = before_judge
-            before_accuracy = self.accuracy(test_data, test_label)
+            before_accuracy = self.accuracy(test_data, test_target)
 
         attr_value = {}  # Record the information gain or Gini index for each attribute
         attr_split_value = {}  # Record the separation value of each attribute,
@@ -144,7 +143,7 @@ class DecisionTreeNode:
             current_label = []
             for index in self.data_index:
                 attr_values.append(data[index][attr])
-                current_label.append(label[index])
+                current_label.append(target[index])
             # If the attribute value is a number, it is considered continuous
             if partition_attr == 'gain':
                 attr_value[attr], attr_split_value[attr] = gain(attr_values, current_label, is_number(data[0][attr]))
@@ -181,21 +180,21 @@ class DecisionTreeNode:
                                            attr_value='> ' + str(split_value),
                                            rest_attribute=rest_attr.copy())
 
-            if test_data and test_label:
+            if test_data and test_target:
                 small_data_count = {}
                 for index in small_child.data_index:
-                    if small_data_count.__contains__(label[index]):
-                        small_data_count[label[index]] += 1
+                    if small_data_count.__contains__(target[index]):
+                        small_data_count[target[index]] += 1
                     else:
-                        small_data_count[label[index]] = 1
+                        small_data_count[target[index]] = 1
                 small_child.judge = max(small_data_count, key=small_data_count.get)  # a judgment added temporarily
 
                 large_data_count = {}
                 for index in large_child.data_index:
-                    if large_data_count.__contains__(label[index]):
-                        large_data_count[label[index]] += 1
+                    if large_data_count.__contains__(target[index]):
+                        large_data_count[target[index]] += 1
                     else:
-                        large_data_count[label[index]] = 1
+                        large_data_count[target[index]] = 1
                 large_child.judge = max(large_data_count, key=large_data_count.get)  # a judgment added temporarily
 
             self.children = [small_child, large_child]
@@ -218,28 +217,28 @@ class DecisionTreeNode:
                                            attr_value=key,
                                            rest_attribute=rest_attr.copy())
 
-                if test_data and test_label:
+                if test_data and test_target:
                     # Also need to give the child node a judgment first
                     tmp_data_count = {}
                     for index in index_list:
-                        if tmp_data_count.__contains__(label[index]):
-                            tmp_data_count[label[index]] += 1
+                        if tmp_data_count.__contains__(target[index]):
+                            tmp_data_count[target[index]] += 1
                         else:
-                            tmp_data_count[label[index]] = 1
+                            tmp_data_count[target[index]] = 1
                         a_child.judge = max(tmp_data_count, key=tmp_data_count.get)  # a judgment added temporarily
 
                 children_list.append(a_child)
             self.children = children_list
 
-        if test_data and test_label:
+        if test_data and test_target:
             self.judge = None
-            if before_accuracy >= self.accuracy(test_data, test_label):
+            if before_accuracy >= self.accuracy(test_data, test_target):
                 self.children = None
                 self.judge = before_judge
                 return
 
         for child in self.children:  # Recursive
-            child.fit(data, label, partition_attr, test_data, test_label)
+            child.fit(data, target, partition_attr, test_data, test_target)
 
     def predict(self, sample):
         """
@@ -269,11 +268,11 @@ class DecisionTreeNode:
 
         return current_node.judge
 
-    def accuracy(self, test_data, test_label):
+    def accuracy(self, test_data, test_target):
         """
         Calculate the correct rate of the current decision tree on the training data set
         :param test_data: Test data set
-        :param test_label: Test data set label
+        :param test_target: Test data set label
         :return:
         """
         root_node = self
@@ -281,18 +280,18 @@ class DecisionTreeNode:
             root_node = root_node.parent
 
         accuracy = 0
-        for i in range(len(test_label)):
-            if root_node.predict(test_data[i]) == test_label[i]:
+        for i in range(len(test_target)):
+            if root_node.predict(test_data[i]) == test_target[i]:
                 accuracy += 1
 
-        return accuracy / len(test_label)
+        return accuracy / len(test_target)
 
-    def post_pruning(self, test_data, test_label, train_label):
+    def post_pruning(self, test_data, test_target, train_target):
         """
         Post-prune operation on the decision tree
         :param test_data: Test data set
-        :param test_label: Test data set label
-        :param train_label: Train data set label
+        :param test_target: Test data set label
+        :param train_target: Train data set label
         :return:
         """
         leaf_father = []  # All children are collections of nodes of leaf nodes
@@ -318,18 +317,18 @@ class DecisionTreeNode:
             # For the leaf parent node that does not need to be pruned, we also remove it from the leaf_father
             current_node = leaf_father.pop()
             # The correct rate of not pruning on the test set
-            before_accuracy = self.accuracy(test_data, test_label)
+            before_accuracy = self.accuracy(test_data, test_target)
 
             label_count = {}
             for index in current_node.data_index:
                 if label_count.__contains__(index):
-                    label_count[train_label[index]] += 1
+                    label_count[train_target[index]] += 1
                 else:
-                    label_count[train_label[index]] = 1
+                    label_count[train_target[index]] = 1
             current_node.judge = max(label_count,
                                      key=label_count.get)  # The judgment that should be made if pruning the current node
 
-            if before_accuracy >= self.accuracy(test_data, test_label):  # No pruning
+            if before_accuracy >= self.accuracy(test_data, test_target):  # No pruning
                 current_node.judge = None
             else:  # Pruning
                 current_node.children = None

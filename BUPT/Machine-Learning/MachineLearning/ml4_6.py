@@ -11,62 +11,63 @@ def run_4_6(dataset, criterion):
                                                         dataset.target_names[dataset.target],
                                                         test_size=0.3,
                                                         random_state=1)  # 70% training and 30% test
-    labels = dataset.feature_names
 
     # Process data first
+    train_target = list(y_train)
+    test_target = list(y_test)
+
     train_data = []
-    train_label = list(y_train)
     for melon in x_train:
         a_dict = {}
         dim = len(melon)
         for i in range(dim):
-            a_dict[labels[i]] = melon[i]
+            a_dict[dataset.feature_names[i]] = melon[i]
         train_data.append(a_dict)
 
     test_data = []
-    test_label = list(y_test)
     for melon in x_test:
         a_dict = {}
         dim = len(melon)
         for i in range(dim):
-            a_dict[labels[i]] = melon[i]
+            a_dict[dataset.feature_names[i]] = melon[i]
         test_data.append(a_dict)
+
     if criterion == 'ID3':
-        decision_tree = ID3_tree(train_data, labels, train_label)
+        decision_tree = ID3_tree(train_data, dataset.feature_names, train_target)
     else:
-        decision_tree = CART_tree(train_data, labels, train_label)
+        decision_tree = CART_tree(train_data, dataset.feature_names, train_target)
 
     print('未剪枝' + criterion + '决策树:')
     decision_tree.print()
-    print('未剪枝' + criterion + '决策树在测试数据集上的分类正确率为：'
-          + str(decision_tree.accuracy(test_data, test_label) * 100)[:5] + "%\n")
+    print('未剪枝' + criterion + '决策树在测试数据集上的分类正确率为：' + str(
+        decision_tree.accuracy(test_data, test_target) * 100)[:5] + "%\n\n")
 
-    print('\n')
-
-    decision_tree.post_pruning(test_data, test_label, train_label)
+    decision_tree.post_pruning(test_data, test_target, train_target)
     print('后剪枝' + criterion + '决策树:')
     decision_tree.print()
-    print('后剪枝' + criterion + '决策树在测试数据集上的分类正确率为：'
-          + str(decision_tree.accuracy(test_data, test_label) * 100)[:5] + "%\n")
-
-    print('\n')
+    print('后剪枝' + criterion + '决策树在测试数据集上的分类正确率为：' + str(
+        decision_tree.accuracy(test_data, test_target) * 100)[:5] + "%\n\n")
 
     if criterion == 'ID3':
-        pre_pruning_decision_tree = ID3_tree(train_data, labels, train_label, test_data, test_label)
+        pre_pruning_decision_tree = ID3_tree(train_data, dataset.feature_names, train_target, test_data, test_target)
     else:
-        pre_pruning_decision_tree = CART_tree(train_data, labels, train_label, test_data, test_label)
+        pre_pruning_decision_tree = CART_tree(train_data, dataset.feature_names, train_target, test_data, test_target)
     print('预剪枝' + criterion + '决策树:')
     pre_pruning_decision_tree.print()
     print('预剪枝' + criterion + '决策树在测试数据集上的分类正确率为：' + str(
-        pre_pruning_decision_tree.accuracy(test_data, test_label) * 100)[:5] + "%")
+        pre_pruning_decision_tree.accuracy(test_data, test_target) * 100)[:5] + "%")
 
 
 if __name__ == '__main__':
     print('--------------------------------IRIS--------------------------------')
-    run_4_6(load_iris(), 'ID3')
+    iris = load_iris()
+    print(iris.DESCR)
+    run_4_6(iris, 'ID3')
     print('\n')
-    run_4_6(load_iris(), 'CART')
+    run_4_6(iris, 'CART')
     print('\n\n--------------------------------WINE--------------------------------')
-    run_4_6(load_wine(), 'ID3')
+    wine = load_wine()
+    print(wine.DESCR)
+    run_4_6(wine, 'ID3')
     print('\n')
-    run_4_6(load_wine(), 'CART')
+    run_4_6(wine, 'CART')
