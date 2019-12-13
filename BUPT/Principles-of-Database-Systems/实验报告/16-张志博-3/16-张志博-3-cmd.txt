@@ -1,0 +1,57 @@
+USE student_course_selection;
+SHOW TABLES;
+SELECT * FROM course;
+SELECT * FROM selective_course;
+SELECT * FROM student;
+SHOW COLUMNS FROM course;
+SHOW COLUMNS FROM selective_course;
+SHOW COLUMNS FROM student;
+
+SELECT credit FROM course WHERE course_name="数据库原理";
+SELECT student_id,grade FROM selective_course WHERE course_id="C01" ORDER BY grade desc;
+SELECT course_id,grade FROM selective_course WHERE student_id="31401";
+SELECT student_id,grade FROM selective_course WHERE course_id="C01" and grade>85;
+
+SELECT student_id,name,grade
+FROM student natural join selective_course
+WHERE course_id="C01" and grade>85;
+
+SELECT student_id,name,course_name,grade
+FROM student natural join course natural join selective_course;
+
+SELECT student_id,name
+FROM student
+WHERE student_id IN(
+SELECT  student_id
+FROM selective_course
+GROUP BY student_id
+HAVING count(*)>=3);
+
+SELECT student_id,max(grade)
+FROM selective_course
+GROUP BY student_id
+HAVING student_id NOT IN(
+SELECT student_id
+FROM selective_course
+WHERE grade is null);
+
+SELECT student_id,name
+FROM selective_course natural join course natural join student
+WHERE course_name="数据库原理";
+
+SELECT student_id,name
+FROM student
+WHERE student_id NOT IN(
+SELECT student_id
+FROM selective_course natural join course
+WHERE course_name="数据库原理");
+
+WITH S(course_id) AS (SELECT course_id FROM selective_course WHERE student_id="31401")
+SELECT student_id,name FROM student
+WHERE not exists(SELECT * FROM S
+WHERE not exists(SELECT * FROM selective_course
+WHERE course_id=S.course_id and student_id=student.student_id));
+
+SELECT student_id,grade FROM view1 WHERE course_id = "C01";
+SELECT student_id,name,course_name,grade FROM view1;
+SELECT student_id,name FROM view1 WHERE course_name="数据库原理";

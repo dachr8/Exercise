@@ -1,0 +1,91 @@
+﻿USE student_course_selection;
+
+CREATE TABLE IF NOT EXISTS `student`(
+`student_id` INT UNSIGNED NOT NULL,
+`name` VARCHAR(40) NOT NULL,
+`gender` CHAR NOT NULL,
+`age` DATETIME NOT NULL,
+`department` VARCHAR(20) NOT NULL,
+`class` SMALLINT UNSIGNED NOT NULL,
+PRIMARY KEY ( `student_id` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `course`(
+`course_id` VARCHAR(10) NOT NULL,
+`course_name` VARCHAR(20) NOT NULL,
+`credit` TINYINT UNSIGNED NOT NULL,
+PRIMARY KEY ( `course_id` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `selective_course`(
+`student_id` MEDIUMINT UNSIGNED NOT NULL,
+`course_id` VARCHAR(10) NOT NULL,
+`grade` TINYINT UNSIGNED,
+PRIMARY KEY ( `student_id` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+SHOW TABLES;
+
+
+SHOW COLUMNS FROM course;
+ALTER TABLE course ADD test1 INT FIRST;
+ALTER TABLE course ADD test2 INT AFTER course_name;
+
+ALTER TABLE course MODIFY test1 CHAR(10) NOT NULL DEFAULT 100;
+
+ALTER TABLE course CHANGE test1 test3 BIGINT;
+
+ALTER TABLE course DROP test2;
+ALTER TABLE course DROP test3;
+
+SHOW COLUMNS FROM student;
+SELECT * FROM student;
+INSERT INTO student
+(student_id, name, gender, age, department, class)
+VALUES
+(123456, "赵二三四五六七八九十", "男", NOW(), "智能科学与技术", 12345);
+
+ALTER TABLE student MODIFY class SMALLINT UNSIGNED NOT NULL;
+ALTER TABLE selective_course MODIFY student_id MEDIUMINT UNSIGNED NOT NULL;
+
+
+SHOW COLUMNS FROM course;
+SELECT * FROM course;
+INSERT INTO course
+(course_id, course_name, credit)
+VALUES
+("AB123", "数据库系统原理课程实践", 99);
+
+SHOW COLUMNS FROM selective_course;
+SELECT * FROM selective_course;
+INSERT INTO selective_course
+(student_id, course_id, grade)
+VALUES
+("123456", "AB123", 101);
+
+SELECT * FROM course;
+UPDATE course SET credit=11 WHERE course_id="AB123";
+DELETE FROM course WHERE course_id="AB123";
+
+CREATE VIEW view1 AS
+SELECT student.student_id, student.name, student.department, course.course_id, course.course_name, selective_course.grade
+FROM student join selective_course on student.student_id=selective_course.student_id
+join course on course.course_id=selective_course.course_id;
+
+SELECT * FROM view1;
+
+CREATE OR REPLACE VIEW view1 AS
+SELECT student.student_id, student.name, student.class, student.department, course.course_id, course.course_name, selective_course.grade
+FROM student join selective_course on student.student_id=selective_course.student_id
+join course on course.course_id=selective_course.course_id;
+
+DROP VIEW view1;
+
+INSERT INTO course VALUES ('C01','编译原理','3'),('C02','数据库原理','3'),('C04','JAVA 程序设计','2'),('C05','计算机组成原理','2'),('C03','操作系统','2')
+
+ALTER TABLE selective_course DROP PRIMARY KEY;
+
+
+DELETE FROM student WHERE student_id="123456";
+DELETE FROM course WHERE course_id="AB123";
+DELETE FROM selective_course WHERE course_id="AB123";
