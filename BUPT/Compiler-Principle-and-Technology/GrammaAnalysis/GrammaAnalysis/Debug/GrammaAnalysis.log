@@ -1,0 +1,7 @@
+﻿  Process "demo.y" bison file
+  Process "demo.l" flex file
+  demo.flex.cpp
+  demo.tab.cpp
+C:\Users\80596\Documents\GitHub\Exercise\BUPT\Compiler-Principle-and-Technology\GrammaAnalysis\GrammaAnalysis\demo.tab.cpp(1047,5): warning C4065: switch 语句包含“default”但是未包含“case”标签
+  正在生成代码...
+  GrammaAnalysis.vcxproj -> C:\Users\80596\Documents\GitHub\Exercise\BUPT\Compiler-Principle-and-Technology\GrammaAnalysis\Debug\GrammaAnalysis.exe

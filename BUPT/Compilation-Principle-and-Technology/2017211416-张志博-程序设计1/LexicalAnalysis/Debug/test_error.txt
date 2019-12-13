@@ -1,3 +1,0 @@
-line32 not a string
-line33 not a string
-line34 not a number
