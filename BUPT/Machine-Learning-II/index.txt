@@ -1,0 +1,16 @@
+- Assignment 1
+	- Task 1 60/70 Points
+		- Code: Task1_Clustering.ipynb
+		- Document: 2017211416-张志博-作业1.pdf
+- Assignment 2
+	- Task 3 10/10 Points
+		- Code: Task3_RandomSampling.ipynb
+		- Document: README3.pdf
+	- Task 4 20/20 Points
+		- Code: Task4_Inference&Sampling.ipynb
+		- Document: README4.html
+- Assignment 3
+	- Task 6 20/30 Points
+		- Code: NamesRNN.py
+		- Document: TASK6_README.pdf / TASK6_README.md
+- Total Expected Points: 110
